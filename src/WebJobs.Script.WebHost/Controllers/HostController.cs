@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,17 +13,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Azure.WebJobs.Host.Scale;
 using Microsoft.Azure.WebJobs.Script.ExtensionBundle;
+using Microsoft.Azure.WebJobs.Script.Extensions;
 using Microsoft.Azure.WebJobs.Script.Scale;
-using Microsoft.Azure.WebJobs.Script.WebHost.Authentication;
 using Microsoft.Azure.WebJobs.Script.WebHost.Filters;
 using Microsoft.Azure.WebJobs.Script.WebHost.Management;
 using Microsoft.Azure.WebJobs.Script.WebHost.Models;
-using Microsoft.Azure.WebJobs.Script.WebHost.Security.Authorization;
 using Microsoft.Azure.WebJobs.Script.WebHost.Security.Authorization.Policies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,6 +46,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost.Controllers
         private readonly IEnvironment _environment;
         private readonly IScriptHostManager _scriptHostManager;
         private readonly IFunctionsSyncManager _functionsSyncManager;
+        private readonly HostPerformanceManager _performanceManager;
         private static int _warmupExecuted;
 
         public HostController(IOptions<ScriptApplicationHostOptions> applicationHostOptions,
@@ -56,7 +56,8 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost.Controllers
             IWebFunctionsManager functionsManager,
             IEnvironment environment,
             IScriptHostManager scriptHostManager,
-            IFunctionsSyncManager functionsSyncManager)
+            IFunctionsSyncManager functionsSyncManager,
+            HostPerformanceManager performanceManager)
         {
             _applicationHostOptions = applicationHostOptions;
             _hostOptions = hostOptions;
@@ -66,6 +67,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost.Controllers
             _environment = environment;
             _scriptHostManager = scriptHostManager;
             _functionsSyncManager = functionsSyncManager;
+            _performanceManager = performanceManager;
         }
 
         [HttpGet]
@@ -112,10 +114,17 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost.Controllers
 
         [HttpGet]
         [HttpPost]
+        [HttpOptions] // TEMP - allow Options only for testing
         [Route("admin/host/ping")]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public IActionResult Ping([FromServices] IScriptHostManager scriptHostManager)
+        public async Task<IActionResult> Ping([FromServices] IScriptHostManager scriptHostManager)
         {
+            var result = await TryHandleHttpScalePingAsync();
+            if (result != null)
+            {
+                return result;
+            }
+
             var pingStatus = new JObject
             {
                 { "hostState", scriptHostManager.State.ToString() }
@@ -318,6 +327,24 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost.Controllers
             }
 
             return NotFound();
+        }
+
+        private async Task<IActionResult> TryHandleHttpScalePingAsync()
+        {
+            int statusCode = (int)HttpStatusCode.OK;
+            var userAgent = HttpContext.Request.GetHeaderValueOrDefault("User-Agent");
+            if (userAgent.Contains(ScriptConstants.HttpScaleUserAgent))
+            {
+                // check host + worker health
+                if (await _performanceManager.IsUnderHighLoad(logger: _logger))
+                {
+                    statusCode = (int)HttpStatusCode.TooManyRequests;
+                }
+
+                return new StatusCodeResult(statusCode);
+            }
+
+            return null;
         }
     }
 }

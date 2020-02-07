@@ -194,8 +194,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
                     return new LinuxContainerMetricsPublisher(environment, standbyOptions, logger, hostNameProvider);
                 }
 
-                var nullMetricsLogger = s.GetService<ILogger<NullMetricsPublisher>>();
-                return new NullMetricsPublisher(nullMetricsLogger);
+                return NullMetricsPublisher.Instance;
             });
 
             services.AddSingleton<IMeshServiceClient>(s =>
@@ -208,8 +207,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
                     return new MeshServiceClient(httpClient, environment, logger);
                 }
 
-                var nullLogger = s.GetService<ILogger<NullMeshServiceClient>>();
-                return new NullMeshServiceClient(nullLogger);
+                return NullMeshServiceClient.Instance;
             });
 
             services.AddSingleton<LinuxContainerActivityPublisher>(s =>
@@ -245,8 +243,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
                     return s.GetRequiredService<LinuxContainerActivityPublisher>();
                 }
 
-                var nullLogger = s.GetService<ILogger<NullLinuxContainerActivityPublisher>>();
-                return new NullLinuxContainerActivityPublisher(nullLogger);
+                return NullLinuxContainerActivityPublisher.Instance;
             });
         }
 

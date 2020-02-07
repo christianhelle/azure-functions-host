@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.ManagedDependencies;
+using Microsoft.Azure.WebJobs.Script.Workers.ProcessManagement;
 
 namespace Microsoft.Azure.WebJobs.Script.Workers.Rpc
 {
@@ -25,6 +26,8 @@ namespace Microsoft.Azure.WebJobs.Script.Workers.Rpc
         Task SendFunctionEnvironmentReloadRequest();
 
         Task StartWorkerProcessAsync();
+
+        Task<WorkerStatus> GetWorkerStatusAsync();
 
         Task DrainInvocationsAsync();
     }

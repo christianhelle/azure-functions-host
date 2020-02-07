@@ -137,6 +137,8 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
             {
                 if (!_watchersStopped)
                 {
+                    FileUtility.EnsureDirectoryExists(_hostLogPath);
+
                     _debugModeFileWatcher = new AutoRecoveringFileSystemWatcher(_hostLogPath, ScriptConstants.DebugSentinelFileName,
                             includeSubdirectories: false, changeTypes: WatcherChangeTypes.Created | WatcherChangeTypes.Changed);
                     _debugModeFileWatcher.Changed += OnDebugModeFileChanged;

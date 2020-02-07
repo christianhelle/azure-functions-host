@@ -2,14 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Azure.WebJobs.Script
 {
     public class SystemEnvironment : IEnvironment
     {
         private static readonly Lazy<SystemEnvironment> _instance = new Lazy<SystemEnvironment>(CreateInstance);
+        private static ConcurrentDictionary<string, string> _cache = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private SystemEnvironment()
         {
@@ -24,12 +24,24 @@ namespace Microsoft.Azure.WebJobs.Script
 
         public string GetEnvironmentVariable(string name)
         {
-            return Environment.GetEnvironmentVariable(name);
+            return _cache.GetOrAdd(name, (k) =>
+            {
+                return Environment.GetEnvironmentVariable(k);
+            });
         }
 
         public void SetEnvironmentVariable(string name, string value)
         {
-            Environment.SetEnvironmentVariable(name, value);
+            _cache.AddOrUpdate(name, value, (k, v) =>
+            {
+                Environment.SetEnvironmentVariable(k, v);
+                return v;
+            });
+        }
+
+        public static void Reset()
+        {
+            _cache.Clear();
         }
     }
 }

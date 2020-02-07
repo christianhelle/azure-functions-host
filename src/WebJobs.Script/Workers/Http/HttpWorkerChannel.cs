@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.Diagnostics;
 using Microsoft.Azure.WebJobs.Script.Eventing;
+using Microsoft.Azure.WebJobs.Script.Workers.ProcessManagement;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Azure.WebJobs.Script.Workers
@@ -99,6 +100,17 @@ namespace Microsoft.Azure.WebJobs.Script.Workers
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        public Task<WorkerStatus> GetWorkerStatusAsync()
+        {
+            // TODO: implement the status request to the worker to
+            // set Latency below
+            var workerStatus = new WorkerStatus
+            {
+                ProcessStats = _workerProcess.GetStats()
+            };
+            return Task.FromResult(workerStatus);
         }
     }
 }

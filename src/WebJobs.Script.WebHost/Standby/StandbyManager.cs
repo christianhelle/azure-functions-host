@@ -102,6 +102,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
             // Trigger a configuration reload to pick up all current settings
             _configuration?.Reload();
 
+            SystemEnvironment.Reset();
             _hostNameProvider.Reset();
 
             // Reset the shared load context to ensure we're reloading

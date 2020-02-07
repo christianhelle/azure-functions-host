@@ -32,7 +32,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
             IDependencyValidator validator = rootServiceProvider.GetService<IDependencyValidator>();
             IMetricsLogger metricsLogger = rootServiceProvider.GetService<IMetricsLogger>();
 
-            _ = builder.UseServiceProviderFactory(new JobHostScopedServiceProviderFactory(rootServiceProvider, rootScopeFactory, validator))
+            builder.UseServiceProviderFactory(new JobHostScopedServiceProviderFactory(rootServiceProvider, rootScopeFactory, validator))
                 .ConfigureServices(services =>
                 {
                     // register default configuration
@@ -45,8 +45,7 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
                 })
                 .AddScriptHost(webHostOptions, configLoggerFactory, metricsLogger, webJobsBuilder =>
                 {
-                    webJobsBuilder
-                        .AddAzureStorageCoreServices();
+                    webJobsBuilder.AddAzureStorageCoreServices();
 
                     configureWebJobs?.Invoke(webJobsBuilder);
 
@@ -63,7 +62,6 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
                     loggingBuilder.Services.AddSingleton<ILoggerFactory, ScriptLoggerFactory>();
 
                     loggingBuilder.AddWebJobsSystem<SystemLoggerProvider>();
-                    loggingBuilder.Services.AddSingleton<ILoggerProvider, UserLogMetricsLoggerProvider>();
                     loggingBuilder.Services.AddSingleton<ILoggerProvider, AzureMonitorDiagnosticLoggerProvider>();
 
                     ConfigureRegisteredBuilders(loggingBuilder, rootServiceProvider);

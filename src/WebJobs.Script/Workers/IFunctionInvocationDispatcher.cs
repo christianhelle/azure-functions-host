@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Description;
+using Microsoft.Azure.WebJobs.Script.Workers.ProcessManagement;
 
 namespace Microsoft.Azure.WebJobs.Script.Workers
 {
@@ -18,6 +19,8 @@ namespace Microsoft.Azure.WebJobs.Script.Workers
         Task InvokeAsync(ScriptInvocationContext invocationContext);
 
         Task InitializeAsync(IEnumerable<FunctionMetadata> functions, CancellationToken cancellationToken = default);
+
+        Task<IDictionary<string, WorkerStatus>> GetWorkerStatusesAsync();
 
         Task ShutdownAsync();
     }
