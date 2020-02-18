@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Script.Abstractions.Description;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.Diagnostics;
 using Microsoft.Azure.WebJobs.Script.Eventing;
@@ -362,12 +363,11 @@ namespace Microsoft.Azure.WebJobs.Script.Tests.Workers.Rpc
             };
             var functionLoadRequest = _workerChannel.GetFunctionLoadRequest(metadata, null);
             Assert.False(functionLoadRequest.Metadata.IsProxy);
-            FunctionMetadata proxyMetadata = new FunctionMetadata()
+            ProxyFunctionMetadata proxyMetadata = new ProxyFunctionMetadata(null)
             {
                 Language = "node",
                 Name = "js1",
-                FunctionId = "TestFunctionId1",
-                IsProxy = true
+                FunctionId = "TestFunctionId1"
             };
             var proxyFunctionLoadRequest = _workerChannel.GetFunctionLoadRequest(proxyMetadata, null);
             Assert.True(proxyFunctionLoadRequest.Metadata.IsProxy);
@@ -413,15 +413,18 @@ namespace Microsoft.Azure.WebJobs.Script.Tests.Workers.Rpc
 
         private IEnumerable<FunctionMetadata> GetTestFunctionsList_WithDisabled(string runtime, string funcName)
         {
+            var metadata = new FunctionMetadata()
+            {
+                Language = runtime,
+                Name = funcName,
+                FunctionId = "DisabledFunctionId1"
+            };
+
+            metadata.SetIsDisabled(true);
+
             var disabledList = new List<FunctionMetadata>()
             {
-                new FunctionMetadata()
-                {
-                    Language = runtime,
-                    Name = funcName,
-                    FunctionId = "DisabledFunctionId1",
-                    IsDisabled = true
-                }
+                metadata
             };
 
             return disabledList.Union(GetTestFunctionsList(runtime));
