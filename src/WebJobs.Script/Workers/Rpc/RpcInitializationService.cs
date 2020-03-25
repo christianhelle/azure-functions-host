@@ -28,7 +28,11 @@ namespace Microsoft.Azure.WebJobs.Script.Workers.Rpc
         {
             {
                 OSPlatform.Windows,
-                new List<string>() { RpcWorkerConstants.JavaLanguageWorkerName }
+                new List<string>()
+                {
+                    RpcWorkerConstants.JavaLanguageWorkerName,
+                    RpcWorkerConstants.PowerShellLanguageWorkerName
+                }
             },
             {
                 OSPlatform.Linux,
@@ -49,7 +53,8 @@ namespace Microsoft.Azure.WebJobs.Script.Workers.Rpc
         private List<string> _placeholderPoolWhitelistedRuntimes = new List<string>()
         {
             RpcWorkerConstants.JavaLanguageWorkerName,
-            RpcWorkerConstants.NodeLanguageWorkerName
+            RpcWorkerConstants.NodeLanguageWorkerName,
+            RpcWorkerConstants.PowerShellLanguageWorkerName
         };
 
         public RpcInitializationService(IOptionsMonitor<ScriptApplicationHostOptions> applicationHostOptions, IEnvironment environment, IRpcServer rpcServer, IWebHostRpcWorkerChannelManager rpcWorkerChannelManager, ILogger<RpcInitializationService> logger)
