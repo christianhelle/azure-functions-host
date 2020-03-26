@@ -28,11 +28,7 @@ namespace Microsoft.Azure.WebJobs.Script.Workers.Rpc
         {
             {
                 OSPlatform.Windows,
-                new List<string>()
-                {
-                    RpcWorkerConstants.JavaLanguageWorkerName,
-                    RpcWorkerConstants.PowerShellLanguageWorkerName
-                }
+                new List<string>() { RpcWorkerConstants.JavaLanguageWorkerName }
             },
             {
                 OSPlatform.Linux,
