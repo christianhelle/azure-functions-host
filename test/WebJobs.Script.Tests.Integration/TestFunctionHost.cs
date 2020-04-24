@@ -333,7 +333,7 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             var metadataProvider = new FunctionMetadataProvider(optionsMonitor, new OptionsWrapper<LanguageWorkerOptions>(workerOptions), NullLogger<FunctionMetadataProvider>.Instance, new TestMetricsLogger());
             var metadataManager = new FunctionMetadataManager(managerServiceProvider.GetService<IOptions<ScriptJobHostOptions>>(),
                 metadataProvider, managerServiceProvider.GetService<IEnumerable<IFunctionProvider>>(),
-                managerServiceProvider.GetService<IOptions<HttpWorkerOptions>>(), manager, factory);
+                managerServiceProvider.GetService<IOptions<HttpWorkerOptions>>(), manager, NullLogger<FunctionMetadataManager>.Instance);
 
             return metadataManager;
         }
